@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"github.com/gorilla/websocket"
 	"html/template"
+	"log"
+	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -22,58 +23,58 @@ type Message struct {
 }
 
 func main() {
-	http.HandleFunc("/", homePage)
+	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", handleConnections)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	go handleMessages()
 
-	fmt.Println("Server started on :8080")
+	log.Println("Server started on :8080")
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
-		panic("Error starting server: " + err.Error())
+		log.Fatalf("Error starting server: %v", err)
 	}
 }
 
-func homePage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("index.html")
+func serveHome(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("static/index.html")
 	if err != nil {
 		http.Error(w, "Could not load template", http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+	if err := tmpl.Execute(w, nil); err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+	}
 }
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("WebSocket upgrade error: %v", err)
 		return
 	}
 	defer conn.Close()
 
 	clients[conn] = true
+	defer delete(clients, conn)
 
 	for {
 		var msg Message
 		err := conn.ReadJSON(&msg)
 		if err != nil {
-			fmt.Println(err)
-			delete(clients, conn)
-			return
+			log.Printf("WebSocket read error: %v", err)
+			break
 		}
-
 		broadcast <- msg
 	}
 }
 
 func handleMessages() {
-	for {
-		msg := <-broadcast
-
+	for msg := range broadcast {
 		for client := range clients {
 			err := client.WriteJSON(msg)
 			if err != nil {
-				fmt.Println(err)
+				log.Printf("WebSocket write error: %v", err)
 				client.Close()
 				delete(clients, client)
 			}
