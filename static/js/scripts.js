@@ -1,12 +1,16 @@
+let username;
+const ws = new WebSocket('ws://localhost:8080/ws');
+
 document.addEventListener('DOMContentLoaded', function() {
     const chat = document.getElementById('chat');
     const messageInput = document.getElementById('messageInput');
     const usernameModal = document.getElementById('usernameModal');
     const usernameInput = document.getElementById('usernameInput');
     const joinChatButton = document.getElementById('joinChatButton');
-    let username;
 
-    const ws = new WebSocket('ws://localhost:8080/ws');
+    ws.onopen = function() {
+        console.log("WebSocket connection established");
+    };
 
     ws.onmessage = function(event) {
         const message = JSON.parse(event.data);
@@ -14,31 +18,20 @@ document.addEventListener('DOMContentLoaded', function() {
         messageElement.innerHTML = `<strong>${message.username}:</strong> ${message.message.replace(/\n/g, '<br>')}`;
         chat.appendChild(messageElement);
         chat.scrollTop = chat.scrollHeight; // Auto-scroll to the bottom
+        console.log("Message received:", message);
     };
 
-    function sendMessage() {
-        if (!username) {
-            alert("Please enter your username");
-            return;
-        }
-        const message = {
-            username: username,
-            message: messageInput.value
-        };
-        ws.send(JSON.stringify(message));
-        messageInput.value = '';
-    }
+    ws.onerror = function(error) {
+        console.error("WebSocket error:", error);
+    };
 
-    function setUsername() {
-        username = usernameInput.value.trim();
-        if (username) {
-            usernameModal.style.display = 'none';
-        } else {
-            alert("Username cannot be empty");
-        }
-    }
+    ws.onclose = function() {
+        console.log("WebSocket connection closed");
+    };
 
-    joinChatButton.addEventListener('click', setUsername);
+    joinChatButton.addEventListener('click', function() {
+        setUsername(usernameInput.value.trim());
+    });
 
     // Handle keypress events for the textarea
     messageInput.addEventListener('keydown', function(event) {
@@ -51,3 +44,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show modal on load
     usernameModal.style.display = 'flex';
 });
+
+function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    if (!username) {
+        alert("Please enter your username");
+        return;
+    }
+    const message = {
+        username: username,
+        message: messageInput.value
+    };
+    console.log("Sending message:", message);
+    ws.send(JSON.stringify(message));
+    messageInput.value = '';
+}
+
+function setUsername(name) {
+    if (name) {
+        username = name;
+        const usernameModal = document.getElementById('usernameModal');
+        usernameModal.style.display = 'none';
+        console.log("Username set to:", username);
+    } else {
+        alert("Username cannot be empty");
+    }
+}
