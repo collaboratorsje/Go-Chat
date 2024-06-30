@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const usernameModal = document.getElementById('usernameModal');
     const usernameInput = document.getElementById('usernameInput');
     const joinChatButton = document.getElementById('joinChatButton');
+    const fontSelect = document.getElementById('fontSelect');
+    let selectedFont = fontSelect.value;
 
     ws.onopen = function() {
         console.log("WebSocket connection established");
@@ -15,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ws.onmessage = function(event) {
         const message = JSON.parse(event.data);
         const messageElement = document.createElement('div');
+        messageElement.style.fontFamily = selectedFont;
         messageElement.innerHTML = `<strong>${message.username}:</strong> ${message.message.replace(/\n/g, '<br>')}`;
         chat.appendChild(messageElement);
         chat.scrollTop = chat.scrollHeight; // Auto-scroll to the bottom
@@ -31,6 +34,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     joinChatButton.addEventListener('click', function() {
         setUsername(usernameInput.value.trim());
+    });
+
+    fontSelect.addEventListener('change', function() {
+        selectedFont = fontSelect.value;
+        console.log("Selected font:", selectedFont);
     });
 
     // Handle keypress events for the textarea
@@ -70,3 +78,5 @@ function setUsername(name) {
         alert("Username cannot be empty");
     }
 }
+
+
