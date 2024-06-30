@@ -74,9 +74,11 @@ function setUsername(name) {
         const usernameModal = document.getElementById('usernameModal');
         usernameModal.style.display = 'none';
         console.log("Username set to:", username);
+        ws.send(JSON.stringify({ username: username, message: "joined" }));
     } else {
         alert("Username cannot be empty");
     }
 }
+
 
 

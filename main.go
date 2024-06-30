@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"html/template"
 	"log"
@@ -64,6 +65,15 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 			log.Printf("WebSocket read error: %v", err)
 			break
 		}
+
+		if msg.Message == "joined" {
+			welcomeMsg := Message{
+				Username: "System",
+				Message:  fmt.Sprintf("Welcome %s!", msg.Username),
+			}
+			broadcast <- welcomeMsg
+		}
+
 		broadcast <- msg
 	}
 }
@@ -80,3 +90,4 @@ func handleMessages() {
 		}
 	}
 }
+
