@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         messageElement.style.fontFamily = selectedFont;
         messageElement.innerHTML = `<strong>${message.username}:</strong> ${message.message.replace(/\n/g, '<br>')}`;
         chat.appendChild(messageElement);
-        chat.scrollTop = chat.scrollHeight; // Auto-scroll to the bottom
+        chat.scrollTop = chat.scrollHeight;
         console.log("Message received:", message);
     };
 
@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle keypress events for the textarea
     messageInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault(); // Prevent new line
-            sendMessage(); // Send the message
+            event.preventDefault();
+            sendMessage();
         }
     });
 
