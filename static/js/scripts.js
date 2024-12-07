@@ -80,5 +80,19 @@ function setUsername(name) {
     }
 }
 
+function resetSession() {
+    if (ws.readyState === WebSocket.OPEN) {
+        const resetMessage = {
+            username: "System",
+            message: "/reset"
+        };
+        ws.send(JSON.stringify(resetMessage));
+        console.log("Session reset command sent");
+    } else {
+        console.error("WebSocket is not open");
+    }
+}
+
+
 
 

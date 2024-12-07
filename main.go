@@ -1,11 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"net/http"
-	"html/template"
 	"log"
+	"net/http"
+	"time"
+
 	"github.com/gorilla/websocket"
+
+	dialogflowcx "cloud.google.com/go/dialogflow/cx/apiv3"
+	"cloud.google.com/go/dialogflow/cx/apiv3/cxpb"
+	"google.golang.org/api/option"
 )
 
 var upgrader = websocket.Upgrader{
@@ -17,9 +23,22 @@ var upgrader = websocket.Upgrader{
 var clients = make(map[*websocket.Conn]bool)
 var broadcast = make(chan Message)
 
+// Message represents a chat message
 type Message struct {
 	Username string `json:"username"`
 	Message  string `json:"message"`
+}
+
+var botAgentMap = map[string]string{
+	"/bot1": "9a9d4f03-3ca9-4517-b653-ff0843045cee", // Travel - Flight Information
+	"/bot2": "df680c7d-6fc9-4e3c-a28f-bd2ca88e03ba", // Small Talk
+	"/bot3": "4fb51b11-e84a-47bc-99f9-d36cbf2a913b", // Telecommunications
+	"/bot4": "acd70926-641c-4984-917a-b8062243a38d", // Financial Services
+	"/bot5": "cb9714ef-eac1-44ea-96d3-18befcfcaed8", // Payment Arrangement
+	"/bot6": "14abc25d-229e-4119-b596-534dac48607b", // Order and Account Management
+	"/bot7": "84bbfb0f-624e-4e72-802b-3469cfaefa9f", // Healthcare
+	"/bot8": "d1aa5bec-e6ea-4778-917a-cd366c571bcc", // Baggage Claim
+	"/bot9": "1e0d311c-73b5-4770-828d-83a6d3a4a9df", // Car Rental
 }
 
 func main() {
@@ -37,44 +56,59 @@ func main() {
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("static/index.html")
-	if err != nil {
-		http.Error(w, "Could not load template", http.StatusInternalServerError)
-		return
-	}
-	if err := tmpl.Execute(w, nil); err != nil {
-		http.Error(w, "Failed to render template", http.StatusInternalServerError)
-	}
+	http.ServeFile(w, r, "static/index.html")
 }
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(w, r, nil) // Upgrade the HTTP connection to WebSocket
 	if err != nil {
 		log.Printf("WebSocket upgrade error: %v", err)
 		return
 	}
-	defer conn.Close()
+	defer conn.Close() // Ensure the connection is closed when the function exits
 
-	clients[conn] = true
-	defer delete(clients, conn)
+	clients[conn] = true // Add the new client to the list of active connections
+	log.Println("New client connected")
+	defer delete(clients, conn) // Remove the client when they disconnect
+
+	sessionID := fmt.Sprintf("session-%d", time.Now().UnixNano()) // Create a unique session ID
 
 	for {
 		var msg Message
+		// Read the message from the WebSocket
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("WebSocket read error: %v", err)
 			break
 		}
 
-		if msg.Message == "joined" {
-			welcomeMsg := Message{
-				Username: "System",
-				Message:  fmt.Sprintf("Welcome %s!", msg.Username),
-			}
-			broadcast <- welcomeMsg
-		}
+		// Broadcast the user's message to all clients, including themselves
+		broadcast <- Message{Username: msg.Username, Message: msg.Message}
 
-		broadcast <- msg
+		// Check if the message is a bot command (e.g., "/bot1 Hello!")
+		if len(msg.Message) >= 5 && msg.Message[:4] == "/bot" {
+			botPrefix := msg.Message[:5] // Extract the bot command (e.g., "/bot1")
+			agentID, exists := botAgentMap[botPrefix]
+			if !exists {
+				// If the bot command is invalid, notify the user
+				broadcast <- Message{Username: "Bot", Message: "Invalid bot command. Use /bot1 to /bot9."}
+				continue
+			}
+
+			// Remove the bot prefix and process the remaining message as a query
+			userMessage := msg.Message[5:]
+			botResponses, err := queryDialogflow(sessionID, userMessage, agentID)
+			if err != nil {
+				log.Printf("Dialogflow error: %v", err)
+				broadcast <- Message{Username: "Bot", Message: "Sorry, I couldn't process your request."}
+				continue
+			}
+
+			// Broadcast all bot responses to the chat
+			for _, botResponse := range botResponses {
+				broadcast <- Message{Username: "Bot", Message: botResponse}
+			}
+		}
 	}
 }
 
@@ -91,3 +125,53 @@ func handleMessages() {
 	}
 }
 
+func queryDialogflow(sessionID, message, agentID string) ([]string, error) {
+	ctx := context.Background()
+
+	// Specify the regional endpoint for us-central1
+	clientOptions := option.WithEndpoint("us-central1-dialogflow.googleapis.com:443")
+
+	// Use the service account credentials with the regional endpoint
+	client, err := dialogflowcx.NewSessionsClient(ctx, option.WithCredentialsFile("credentials.json"), clientOptions)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Dialogflow CX client: %v", err)
+	}
+	defer client.Close()
+
+	// Define the session path dynamically based on the agent ID
+	projectID := "go-chat-bot-435203"
+	location := "us-central1"
+	sessionPath := fmt.Sprintf("projects/%s/locations/%s/agents/%s/sessions/%s", projectID, location, agentID, sessionID)
+
+	// Create a text input
+	textInput := &cxpb.TextInput{
+		Text: message,
+	}
+	queryInput := &cxpb.QueryInput{
+		Input:        &cxpb.QueryInput_Text{textInput},
+		LanguageCode: "en",
+	}
+
+	// Send the query to Dialogflow CX
+	response, err := client.DetectIntent(ctx, &cxpb.DetectIntentRequest{
+		Session:    sessionPath,
+		QueryInput: queryInput,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to detect intent: %v", err)
+	}
+
+	// Extract all response messages
+	var responses []string
+	for _, message := range response.GetQueryResult().GetResponseMessages() {
+		if text := message.GetText().GetText(); len(text) > 0 {
+			responses = append(responses, text[0]) // Append each message to the list
+		}
+	}
+
+	if len(responses) == 0 {
+		return nil, fmt.Errorf("no response from Dialogflow CX")
+	}
+
+	return responses, nil
+}

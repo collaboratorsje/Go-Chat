@@ -70,6 +70,19 @@ body {
     background-color: #218838;
 }
 
+#resetSessionButton {
+    padding: 10px 20px;
+    background-color: #b66d01;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#resetSessionButton:hover {
+    background-color: #512602;
+}
+
 .modal {
     display: flex;
     position: fixed;
@@ -127,6 +140,3 @@ body {
         opacity: 1;
     }
 }
-
-
-
