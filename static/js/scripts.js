@@ -17,11 +17,21 @@ document.addEventListener('DOMContentLoaded', function() {
     ws.onmessage = function(event) {
         const message = JSON.parse(event.data);
         const messageElement = document.createElement('div');
-        messageElement.style.fontFamily = selectedFont;
+    
+        // Add class based on message sender
+        if (message.username === 'Bot') {
+            messageElement.classList.add('bot-message');
+        } else {
+            messageElement.classList.add('user-message');
+        }
+    
+        // Set message content
         messageElement.innerHTML = `<strong>${message.username}:</strong> ${message.message.replace(/\n/g, '<br>')}`;
-        chat.appendChild(messageElement);
+        document.getElementById('chat').appendChild(messageElement);
+    
+        // Scroll to the latest message
+        const chat = document.getElementById('chat');
         chat.scrollTop = chat.scrollHeight;
-        console.log("Message received:", message);
     };
 
     ws.onerror = function(error) {

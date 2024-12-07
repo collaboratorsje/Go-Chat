@@ -9,29 +9,74 @@ body {
     flex-direction: column;
 }
 
-#chat-container {
-    width: 90%;
-    max-width: 600px;
+#main-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    max-width: 1000px;
+    height: 86%; /* Adjusted height for spacing (100% - 7% top and bottom) */
     background: white;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    margin: 7% auto; /* Center the container vertically with spacing */
+}
+
+#bot-menu {
+    width: 25%; /* Fixed width */
+    min-width: 25%; /* Prevent shrinking */
+    max-width: 25%; /* Prevent expanding */
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent content overflow */
+    word-wrap: break-word; /* Ensure text wraps properly */
+    overflow-wrap: break-word; /* Handle long unbroken text gracefully */
+}
+
+#bot-menu h2 {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+#bot-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#bot-menu ul li {
+    font-size: 14px;
+    line-height: 1.8;
+    margin: 5px 0;
+}
+
+#chat-container {
+    flex-grow: 1; /* Take up remaining space */
     display: flex;
     flex-direction: column;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 #chat {
     flex-grow: 1;
     padding: 20px;
     height: 400px;
-    overflow-y: scroll;
+    overflow-y: auto;
     border-bottom: 1px solid #ddd;
 }
 
 #chat div {
     margin-bottom: 15px;
-    word-wrap: break-word;
-    white-space: pre-wrap; 
+    word-wrap: break-word; /* Break long words */
+    overflow-wrap: break-word; /* Handle unbroken strings */
+    white-space: pre-wrap; /* Preserve line breaks but allow wrapping */
+    max-width: calc(100% - 50px); /* Prevent messages from exceeding container width */
 }
 
 #messageInputContainer {
@@ -139,4 +184,20 @@ body {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+/* User messages (slightly larger font size and bold) */
+.user-message {
+    font-family: Arial, sans-serif;
+    font-weight: 600; /* Slightly bold */
+    font-size: 15px; /* Slightly larger font for distinction */
+    color: #2a2a2a; /* Dark gray for user messages */
+}
+
+/* Bot messages (regular weight with a slight gray tone) */
+.bot-message {
+    font-family: "Helvetica Neue", sans-serif;
+    font-weight: 400; /* Regular weight */
+    font-size: 14px; /* Standard font size */
+    color: #4a4a4a; /* Slightly lighter gray for bot messages */
 }
