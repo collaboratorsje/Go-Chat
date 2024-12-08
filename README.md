@@ -30,7 +30,7 @@ Core Dependencies:
 
 Install the following packages to ensure the application runs correctly:
 
-''' go get github.com/gorilla/websocket '''
+' go get github.com/gorilla/websocket '
 ''' go get cloud.google.com/go/dialogflow/cx/apiv3 '''
 ''' go get google.golang.org/api/option '''
 ''' go get github.com/joho/godotenv '''
