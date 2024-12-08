@@ -1,0 +1,109 @@
+User Guide for Go-Chat
+
+Welcome to Go-Chat! This guide provides step-by-step instructions for end users to effectively use the chat application. Go-Chat offers real-time messaging and interaction with specialized chatbots to enhance your experience.
+
+1. Accessing the Chatroom
+
+Open a web browser and navigate to the hosted Go-Chat URL:
+
+https://go-chat-1036147648426.us-central1.run.app/
+
+Once the page loads, you will see the chat interface with a message box and a display area for messages.
+
+2. Using WebSocket-Based Real-Time Messaging
+
+Send a Message:
+
+Type your message in the input field at the bottom of the chat interface.
+
+Press the "Send" button or hit Enter to send your message.
+
+Receive Messages:
+
+Messages from other users or chatbots will appear in the message display area in real time.
+
+Identify Participants:
+
+Usernames are displayed alongside each message to indicate who sent it.
+
+3. Interacting with Chatbots
+
+Go-Chat includes 9 specialized chatbots to assist with various tasks. Each chatbot is triggered using specific commands. Below are the bot commands and their functions:
+
+Available Chatbots:
+
+/bot1: Financial Services Bot
+
+/bot2: Healthcare Bot
+
+/bot3: Order and Account Management Bot
+
+/bot4: Payment Arrangement Bot
+
+/bot5: Telecommunications Bot
+
+/bot6: Flight Information Bot
+
+/bot7: Car Rental Bot
+
+/bot8: Baggage Claim Bot
+
+/bot9: Small Talk Bot
+
+Example Commands:
+
+To get assistance with financial services:
+
+Type: /bot1 How do I open a savings account?
+
+For small talk or casual interaction:
+
+Type: /bot9 Tell me a joke.
+
+Each chatbot provides relevant responses tailored to its purpose. Simply type the command followed by your query to interact with the bot.
+
+4. Troubleshooting Common Issues
+
+Connectivity Problems
+
+Issue: Unable to send or receive messages.
+
+Solution:
+
+Check your internet connection.
+
+Refresh the browser page.
+
+Ensure the hosted URL is correct.
+
+Incorrect Bot Commands
+
+Issue: Bot does not respond or returns an error.
+
+Solution:
+
+Verify that you are using the correct bot command (e.g., /bot1).
+
+Ensure your query is clear and relevant to the bot’s functionality.
+
+WebSocket Disconnection
+
+Issue: Real-time messaging stops working.
+
+Solution:
+
+Check your internet stability.
+
+Refresh the browser page to re-establish the WebSocket connection.
+
+Slow Responses from Chatbots
+
+Issue: Chatbot responses take longer than expected.
+
+Solution:
+
+Wait a moment, as server load may be temporarily high.
+
+Retry the command if no response is received.
+
+Thank you for using Go-Chat!
