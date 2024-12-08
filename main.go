@@ -44,26 +44,11 @@ var botAgentMap = map[string]string{
 	"/bot9": "1e0d311c-73b5-4770-828d-83a6d3a4a9df", // Car Rental
 }
 
-func secureHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow WebSocket connections to the specific server
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; connect-src 'self' ws://*")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("X-Frame-Options", "DENY")
-		w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
-		w.Header().Set("X-XSS-Protection", "1; mode=block")
-		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
-
-		// Call the next handler
-		next.ServeHTTP(w, r)
-	})
-}
-
 func main() {
-	// Secure headers applied to all routes
-	http.Handle("/", secureHeaders(http.HandlerFunc(serveHome)))
-	http.Handle("/ws", secureHeaders(http.HandlerFunc(handleConnections)))
-	http.Handle("/static/", secureHeaders(http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
+	// Register routes without secure headers
+	http.Handle("/", http.HandlerFunc(serveHome))
+	http.Handle("/ws", http.HandlerFunc(handleConnections))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	go handleMessages()
 

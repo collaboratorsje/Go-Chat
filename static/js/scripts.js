@@ -1,13 +1,10 @@
 let username;
-// Get the current protocol (http or https) and port
 const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 const host = window.location.hostname;
-const port = window.location.port || (protocol === 'wss' ? '443' : '8080');  // Default to 8080 or 443 for HTTPS
+const wsUrl = host === 'localhost'
+    ? `${protocol}://${host}:8080/ws` // Use port 8080 for local development
+    : `${protocol}://${host}/ws`;     // No port for Cloud Run
 
-// Construct the WebSocket URL dynamically
-const wsUrl = `${protocol}://${host}:${port}/ws`;
-
-// Connect to the WebSocket
 const ws = new WebSocket(wsUrl);
 
 document.addEventListener('DOMContentLoaded', function() {

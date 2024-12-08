@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: go-chat
-        image: gcr.io/go-chat-bot-435203/go-chat:latest
+        image: gcr.io/go-chat-bot-435203/go-chat:v1.3.0
         ports:
         - containerPort: 8080

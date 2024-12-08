@@ -319,25 +319,6 @@ func TestSanitizeMessage(t *testing.T) {
 	assert.Equal(t, expected, output, "Expected sanitized message to match")
 }
 
-func TestSecureHeaders(t *testing.T) {
-	handler := secureHeaders(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	}))
-
-	req, _ := http.NewRequest("GET", "/", nil)
-	w := httptest.NewRecorder()
-
-	handler.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, "default-src 'self'", w.Header().Get("Content-Security-Policy"))
-	assert.Equal(t, "nosniff", w.Header().Get("X-Content-Type-Options"))
-	assert.Equal(t, "DENY", w.Header().Get("X-Frame-Options"))
-	assert.Contains(t, w.Header().Get("Strict-Transport-Security"), "max-age=63072000")
-	assert.Equal(t, "1; mode=block", w.Header().Get("X-XSS-Protection"))
-	assert.Equal(t, "strict-origin-when-cross-origin", w.Header().Get("Referrer-Policy"))
-}
-
 func TestMessageCharacterLimit(t *testing.T) {
 	longMessage := string(make([]byte, messageCharLimit+1))
 	msg := Message{Username: "TestUser", Message: longMessage}

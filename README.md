@@ -18,3 +18,6 @@ Testing
 go get github.com/stretchr/testify
 go install github.com/golang/mock/mockgen@latest
 go install golang.org/x/tools/cmd/cover@latest
+
+Live Server:
+https://go-chat-1036147648426.us-central1.run.app/
