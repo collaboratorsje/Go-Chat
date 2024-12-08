@@ -92,7 +92,7 @@ func sanitizeMessage(input string) string {
 }
 
 var ipConnectionCount = make(map[string]int)
-var maxConnectionsPerIP = 8 // Limit to 5 connections per IP
+var maxConnectionsPerIP = 8 // Limit to 8 connections per IP
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
