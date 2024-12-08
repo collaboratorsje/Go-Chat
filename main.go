@@ -221,18 +221,33 @@ func handleMessages() {
 func queryDialogflow(sessionID, message, agentID string) ([]string, error) {
 	ctx := context.Background()
 
-	// Configure credentials
-	credentialsBase64 := os.Getenv("DIALOGFLOW_CREDENTIALS")
-	if credentialsBase64 == "" {
-		return nil, fmt.Errorf("DIALOGFLOW_CREDENTIALS environment variable is not set")
+	var credentials []byte
+	var err error
+
+	// Check if the DIALOGFLOW_CREDENTIALS environment variable is set
+	credentialsEnv := os.Getenv("DIALOGFLOW_CREDENTIALS")
+	if credentialsEnv != "" {
+		// If it's set, it should contain base64 encoded credentials (for Docker)
+		log.Println("Using DIALOGFLOW_CREDENTIALS from environment variable")
+		credentials, err = base64.StdEncoding.DecodeString(credentialsEnv)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode credentials from environment variable: %v", err)
+		}
+	} else {
+		// If not set, try to read from the local file (credentials.json)
+		log.Println("Using credentials.json from the local filesystem")
+		credentials, err = os.ReadFile("credentials.json")
+		if err != nil {
+			// Check if the code is running in a Docker container (based on Docker's file mounting)
+			log.Println("No credentials found in the local filesystem, attempting to load from Docker")
+			credentials, err = os.ReadFile("/app/credentials/credentials.json")
+			if err != nil {
+				return nil, fmt.Errorf("failed to read credentials file: %v", err)
+			}
+		}
 	}
 
-	credentials, err := base64.StdEncoding.DecodeString(credentialsBase64)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode credentials: %v", err)
-	}
-
-	// Configure endpoint explicitly for us-central1
+	// Configure the Dialogflow client
 	clientOptions := []option.ClientOption{
 		option.WithCredentialsJSON(credentials),
 		option.WithEndpoint("us-central1-dialogflow.googleapis.com:443"),

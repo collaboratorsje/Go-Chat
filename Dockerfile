@@ -11,10 +11,13 @@ RUN go mod download
 # Copy the application source code
 COPY . .
 
+# Copy credentials.json into the container
+COPY credentials.json /app/credentials.json
+
 # Build the Go application
 RUN go build -o main .
 
-# Expose the default port (this is optional and doesn't need to match the dynamic port)
+# Expose the port your app runs on
 EXPOSE 8080
 
 # Run the application
