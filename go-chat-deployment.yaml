@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-chat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-chat
+  template:
+    metadata:
+      labels:
+        app: go-chat
+    spec:
+      containers:
+      - name: go-chat
+        image: gcr.io/go-chat-bot-435203/go-chat:latest
+        ports:
+        - containerPort: 8080

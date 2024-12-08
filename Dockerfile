@@ -14,6 +14,9 @@ COPY . .
 # Copy credentials.json into the container
 COPY credentials.json /app/credentials.json
 
+# List files in /app to verify credentials.json is present
+RUN ls -al /app
+
 # Build the Go application
 RUN go build -o main .
 
