@@ -12,3 +12,9 @@ This chat is still under development.
 go get github.com/gorilla/websocket
 go get cloud.google.com/go/dialogflow/cx/apiv3
 go get google.golang.org/api/option
+
+Testing
+
+go get github.com/stretchr/testify
+go install github.com/golang/mock/mockgen@latest
+go install golang.org/x/tools/cmd/cover@latest
